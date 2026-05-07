@@ -107,13 +107,12 @@
 
     async function loadData() {
 
-      const { data: contributions } =
-        await supabase
-          .from('contributions')
-          .select(`
-            *,
-            members(name)
-          `)
+    const { data: contributions } =
+      await supabase
+        .from('contributions')
+        .select('*')
+
+   console.log(contributions)
 
       const { data: expenses } =
         await supabase
