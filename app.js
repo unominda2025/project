@@ -1,8 +1,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 // ===== THAY THÔNG TIN CỦA BẠN =====
-const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co'
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'
+const SUPABASE_URL = 'https://hhxsiutlbvtynkwlsbkr.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoeHNpdXRsYnZ0eW5rd2xzYmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMzMzMzksImV4cCI6MjA5MzYwOTMzOX0.IeopLqxMKgvmtmz7PQve0GlEp67V1leGrxo3eWVW-NU'
 // ==================================
 
 const supabase = createClient(
