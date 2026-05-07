@@ -1,6 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fund Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
 <body>
-  <h1>TEST OK</h1>
+
+<h1>Fund Dashboard</h1>
+
+<div id="yearChart"></div>
+<div id="monthChart"></div>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Year</th>
+      <th>Month</th>
+      <th>Amount</th>
+    </tr>
+  </thead>
+  <tbody id="contributionTable"></tbody>
+</table>
+
+<script>
+const SUPABASE_URL = "https://hhxsiutlbvtynkwlsbkr.supabase.co"
+const SUPABASE_KEY = "YOUR_KEY"
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+loadData()
+
+async function loadData() {
+  const { data: contributions } = await supabase.from('contributions').select('*')
+  const { data: expenses } = await supabase.from('expenses').select('*')
+
+  renderTable(contributions || [])
+}
+
+function renderTable(data){
+  document.getElementById("contributionTable").innerHTML =
+    data.map(i => `
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.year}</td>
+        <td>${i.month}</td>
+        <td>${i.amount}</td>
+      </tr>
+    `).join("")
+}
+</script>
+
 </body>
 </html>
