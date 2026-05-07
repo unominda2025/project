@@ -1,28 +1,303 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GitHub Pages + Supabase</title>
 
-  <link rel="stylesheet" href="style.css">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Fund Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <style>
+
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+  </style>
+
 </head>
+
 <body>
 
-  <div class="container">
-    <h1>Products</h1>
+  <h1>Fund Dashboard</h1>
 
-    <form id="product-form">
-      <input type="text" id="name" placeholder="Tên sản phẩm" required />
-      <input type="number" id="price" placeholder="Giá" required />
-      <button type="submit">Thêm</button>
-    </form>
+  <div class="card">
 
-    <div id="loading">Loading...</div>
+    <h2>Income vs Expense by Year</h2>
 
-    <ul id="product-list"></ul>
+    <div id="yearChart"></div>
+
   </div>
 
-  <script type="module" src="app.js"></script>
+  <div class="card">
+
+    <h2>Monthly Income vs Expense</h2>
+
+    <div id="monthChart"></div>
+
+  </div>
+
+  <div class="card">
+
+    <h2>Contribution List</h2>
+
+    <table width="100%">
+
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Year</th>
+          <th>Month</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+
+      <tbody id="contributionTable"></tbody>
+
+    </table>
+
+  </div>
+
+  <script>
+
+    const SUPABASE_URL =
+      'https://hhxsiutlbvtynkwlsbkr.supabase.co'
+
+    const SUPABASE_KEY =
+      'DÁN_ANON_KEY_CỦA_BẠN'
+
+    const supabase =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      )
+
+    loadData()
+
+    async function loadData() {
+
+      const { data: contributions } =
+        await supabase
+          .from('contributions')
+          .select(`
+            *,
+            members(name)
+          `)
+
+      const { data: expenses } =
+        await supabase
+          .from('expenses')
+          .select('*')
+
+      renderContributionTable(contributions)
+
+      renderYearChart(contributions, expenses)
+
+      renderMonthChart(contributions, expenses)
+
+    }
+
+    function renderContributionTable(contributions) {
+
+      const table =
+        document.getElementById(
+          'contributionTable'
+        )
+
+      table.innerHTML = ''
+
+      contributions.forEach(item => {
+
+        table.innerHTML += `
+          <tr>
+            <td>${item.members.name}</td>
+            <td>${item.year}</td>
+            <td>${item.month}</td>
+            <td>
+              ${Number(item.amount)
+                .toLocaleString()} đ
+            </td>
+          </tr>
+        `
+
+      })
+
+    }
+
+    function renderYearChart(
+      contributions,
+      expenses
+    ) {
+
+      const incomeByYear = {}
+
+      const expenseByYear = {}
+
+      contributions.forEach(item => {
+
+        if (!incomeByYear[item.year]) {
+          incomeByYear[item.year] = 0
+        }
+
+        incomeByYear[item.year] +=
+          Number(item.amount)
+
+      })
+
+      expenses.forEach(item => {
+
+        if (!expenseByYear[item.year]) {
+          expenseByYear[item.year] = 0
+        }
+
+        expenseByYear[item.year] +=
+          Number(item.amount)
+
+      })
+
+      const years = [...new Set([
+        ...Object.keys(incomeByYear),
+        ...Object.keys(expenseByYear)
+      ])]
+
+      const incomeData =
+        years.map(
+          year => incomeByYear[year] || 0
+        )
+
+      const expenseData =
+        years.map(
+          year => expenseByYear[year] || 0
+        )
+
+      new ApexCharts(
+        document.querySelector("#yearChart"),
+        {
+          chart: {
+            type: 'bar',
+            height: 400
+          },
+
+          series: [
+            {
+              name: 'Income',
+              data: incomeData
+            },
+            {
+              name: 'Expense',
+              data: expenseData
+            }
+          ],
+
+          xaxis: {
+            categories: years
+          }
+        }
+      ).render()
+
+    }
+
+    function renderMonthChart(
+      contributions,
+      expenses
+    ) {
+
+      const selectedYear = 2025
+
+      const incomeMonths =
+        Array(12).fill(0)
+
+      const expenseMonths =
+        Array(12).fill(0)
+
+      contributions.forEach(item => {
+
+        if (item.year === selectedYear) {
+
+          incomeMonths[
+            item.month - 1
+          ] += Number(item.amount)
+
+        }
+
+      })
+
+      expenses.forEach(item => {
+
+        if (item.year === selectedYear) {
+
+          expenseMonths[
+            item.month - 1
+          ] += Number(item.amount)
+
+        }
+
+      })
+
+      new ApexCharts(
+        document.querySelector("#monthChart"),
+        {
+          chart: {
+            type: 'line',
+            height: 400
+          },
+
+          series: [
+            {
+              name: 'Income',
+              data: incomeMonths
+            },
+            {
+              name: 'Expense',
+              data: expenseMonths
+            }
+          ],
+
+          xaxis: {
+            categories: [
+              'Jan','Feb','Mar','Apr',
+              'May','Jun','Jul','Aug',
+              'Sep','Oct','Nov','Dec'
+            ]
+          }
+        }
+      ).render()
+
+    }
+
+  </script>
+
 </body>
+
 </html>
