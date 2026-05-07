@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -32,6 +33,7 @@
       padding: 20px;
       border-radius: 12px;
       margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
     table {
@@ -42,6 +44,10 @@
       border: 1px solid #ddd;
       padding: 10px;
       text-align: left;
+    }
+
+    th {
+      background: #fafafa;
     }
 
   </style>
@@ -95,7 +101,7 @@
       'https://hhxsiutlbvtynkwlsbkr.supabase.co'
 
     const SUPABASE_KEY =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoeHNpdXRsYnZ0eW5rd2xzYmtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMzMzMzksImV4cCI6MjA5MzYwOTMzOX0.IeopLqxMKgvmtmz7PQve0GlEp67V1leGrxo3eWVW-NU'
+      'YOUR_ANON_KEY'
 
     const supabase =
       window.supabase.createClient(
@@ -107,12 +113,13 @@
 
     async function loadData() {
 
-    const { data: contributions } =
-      await supabase
-        .from('contributions')
-        .select('*')
+      const { data: contributions, error } =
+        await supabase
+          .from('contributions')
+          .select('*')
 
-   console.log(contributions)
+      console.log(contributions)
+      console.log(error)
 
       const { data: expenses } =
         await supabase
@@ -140,7 +147,7 @@
 
         table.innerHTML += `
           <tr>
-            <td>${item.members.name}</td>
+            <td>${item.name}</td>
             <td>${item.year}</td>
             <td>${item.month}</td>
             <td>
@@ -176,11 +183,15 @@
 
       expenses.forEach(item => {
 
-        if (!expenseByYear[item.year]) {
-          expenseByYear[item.year] = 0
+        const year =
+          new Date(item.expense_date)
+            .getFullYear()
+
+        if (!expenseByYear[year]) {
+          expenseByYear[year] = 0
         }
 
-        expenseByYear[item.year] +=
+        expenseByYear[year] +=
           Number(item.amount)
 
       })
@@ -254,11 +265,19 @@
 
       expenses.forEach(item => {
 
-        if (item.year === selectedYear) {
+        const date =
+          new Date(item.expense_date)
 
-          expenseMonths[
-            item.month - 1
-          ] += Number(item.amount)
+        const year =
+          date.getFullYear()
+
+        const month =
+          date.getMonth()
+
+        if (year === selectedYear) {
+
+          expenseMonths[month] +=
+            Number(item.amount)
 
         }
 
@@ -300,3 +319,4 @@
 </body>
 
 </html>
+```
